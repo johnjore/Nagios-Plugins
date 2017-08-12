@@ -25,10 +25,10 @@ Written by farid.joubbi@consign.se
 1.2 2017-08-12 Modified by John Jore. Accepts additional parameters for customizations. Working examples:
     check_cpufan=cmd /c echo scripts\\check_ohm_temperatures.ps1 -Name "CPU Fan" -warning 1200 -critical 1000 -Query "SELECT * FROM Sensor WHERE Name='CPU Fan'"; exit $LastExitCode | powershell.exe -ExecutionPolicy byPass -noprofile -command -
     check_systmp=cmd /c echo scripts\\check_ohm_temperatures.ps1 -Name "System Temp" -warning 70 -critical 80 -Query "SELECT * FROM Sensor WHERE Name='System'"; exit $LastExitCode | powershell.exe -ExecutionPolicy byPass -noprofile -command -
-    check_cpucore1=cmd /c echo scripts\\check_ohm_temperatures.ps1 -Name "CPU Core 1 Temp" -warning 95 -critical 99 -Query "SELECT * FROM Sensor WHERE Name='CPU Core #1'"; exit $LastExitCode | powershell.exe -ExecutionPolicy byPass -noprofile -command -
-    check_cpucore2=cmd /c echo scripts\\check_ohm_temperatures.ps1 -Name "CPU Core 2 Temp" -warning 95 -critical 99 -Query "SELECT * FROM Sensor WHERE Name='CPU Core #2'"; exit $LastExitCode | powershell.exe -ExecutionPolicy byPass -noprofile -command -
+    check_cpucore1=cmd /c echo scripts\\check_ohm_temperatures.ps1 -Name "CPU Core 1 Temp" -warning 95 -critical 99 -Query "SELECT * FROM Sensor WHERE Name='CPU Core #1' and SensorType='Temperature'"; exit $LastExitCode | powershell.exe -ExecutionPolicy byPass -noprofile -command -
+    check_cpucore2=cmd /c echo scripts\\check_ohm_temperatures.ps1 -Name "CPU Core 2 Temp" -warning 95 -critical 99 -Query "SELECT * FROM Sensor WHERE Name='CPU Core #2' and SensorType='Temperature'"; exit $LastExitCode | powershell.exe -ExecutionPolicy byPass -noprofile -command -
     check_cputmp=cmd /c echo scripts\\check_ohm_temperatures.ps1 -Name "CPU Temp" -warning 95 -critical 99 -Query "SELECT * FROM Sensor WHERE Name='CPU'"; exit $LastExitCode | powershell.exe -ExecutionPolicy byPass -noprofile -command -
-    check_hdtmp=cmd /c echo scripts\\check_ohm_temperatures.ps1 -Name "HD Temp" -warning 58 -critical 60 -Query "SELECT * FROM Sensor WHERE Name='Temperature'"; exit $LastExitCode | powershell.exe -ExecutionPolicy byPass -noprofile -command -    
+    check_hdtmp=cmd /c echo scripts\\check_ohm_temperatures.ps1 -Name "HD Temp" -warning 58 -critical 60 -Query "SELECT * FROM Sensor WHERE Name='Temperature'"; exit $LastExitCode | powershell.exe -ExecutionPolicy byPass -noprofile -command -
 1.1 2016-03-24 Minor cleanup of variables and documentation.
 1.0 2016-03-11 Initial release.
 
@@ -56,17 +56,8 @@ if ((Get-Process -Name OpenHardwareMonitor -ErrorAction SilentlyContinue) -eq $n
     exit 3
 }
 
-# Check that critical is set to higher than warning
-#if ($warning -gt $critical) {
-#    write-host 'warning set to higher than critical temperature!'
-#    exit 3
-#}
-
-# Get the temperatures from all the found sensors and check them
+# Run the query
 $temperatures = Get-WmiObject -Namespace "Root\OpenHardwareMonitor" -Query $Query | sort-object Identifier
-  # -Query "SELECT * FROM Sensor WHERE Sensortype='Temperature'" | sort-object Identifier
-  # -Query "SELECT * FROM Sensor WHERE Name='CPU Core #1'" | sort-object Identifier
-  # -Query "SELECT * FROM Sensor WHERE Name='Temperature'"  | sort-object Identifier
 
 $temperature_string = foreach ($result in $temperatures){
     #$result.Identifier = $result.Identifier -replace '^/','' -replace 'temperature/',''
